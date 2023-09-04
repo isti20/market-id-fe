@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Card, Form, InputGroup ,Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import handleErrorMessage from "../utils/handleErrorMessage";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { axiosInstance as axios} from "../config/https";
 
 const initialValues = {
     full_name: "",
@@ -22,6 +25,7 @@ const validationSchema = Yup.object({
 
 export default function Register() {
     const [show, setShow] = useState(false);
+    const navigate = useNavigate();
 
     function handleShowPassword() {
         setShow(!show);
@@ -30,10 +34,31 @@ export default function Register() {
     const formik = useFormik({
         initialValues,
         validationSchema,
-        onSubmit: (values) => {
-            console.log("Ini", values);
-        },
+        onSubmit: handleRegister,
     });
+
+    function handleRegister(form) {
+        axios
+        .post("/users/new", form)
+        .then((response) => {
+            const message = response.data.message;
+
+            toast(handleErrorMessage(message), {
+                position: toast.POSITION.TOP_RIGHT,
+                type: toast.TYPE.SUCCESS,
+            });
+
+            navigate("/login");
+        })
+        .catch((error) => {
+            const message = error.response?.data?.message;
+
+            toast(handleErrorMessage(message), {
+                position: toast.POSITION.TOP_RIGHT,
+                type: toast.TYPE.ERROR,
+            });
+        });
+    }
 
     return (
         <section className="d-flex justify-content-center align-items-center min-vh-100">
@@ -96,7 +121,7 @@ export default function Register() {
                                 }
                             />
 
-                            <Button onClick={handleShowPassword}>
+                            <Button variant="light" onClick={handleShowPassword}>
                                 {show ? (
                                     <i className="bi bi-eye"></i>
                                 ) : (
