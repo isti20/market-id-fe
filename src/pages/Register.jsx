@@ -76,13 +76,15 @@ export default function Register() {
                                 placeholder="Elon Musk"
                                 maxLength="32"
                                 value={formik.values.full_name}
+                                onBlur={formik.handleBlur}
                                 onChange={formik.handleChange}
                                 className={
+                                    formik.touched.full_name &&
                                     formik.errors.full_name && "border-danger"
                                 }
                             />
 
-                            {formik.errors.full_name && (
+                            {formik.touched.full_name && formik.errors.full_name && (
                                 <small className="text-danger text__5">{formik.errors.full_name}</small>
                             )}
                         </Form.Group>
@@ -95,13 +97,15 @@ export default function Register() {
                                 type="email"
                                 placeholder="example@market.id"
                                 value={formik.values.email}
+                                onBlur={formik.handleBlur}
                                 onChange={formik.handleChange}
                                 className={
+                                    formik.touched.email &&
                                     formik.errors.email && "border-danger"
                                 }
                             />
 
-                            {formik.errors.email && (
+                            {formik.touched.email && formik.errors.email && (
                                 <small className="text-danger text__5">{formik.errors.email}</small>
                             )}
                         </Form.Group>
@@ -115,8 +119,10 @@ export default function Register() {
                                 type={show ? "text" : "password"}
                                 placeholder="Password"
                                 value={formik.values.password}
+                                onBlur={formik.handleBlur}
                                 onChange={formik.handleChange}
                                 className={
+                                    formik.touched.password &&
                                     formik.errors.password && "border-danger"
                                 }
                             />
@@ -130,7 +136,7 @@ export default function Register() {
                             </Button>
                             </InputGroup>
 
-                            {formik.errors.password && (
+                            {formik.touched.password && formik.errors.password && (
                                 <small className="text-danger text__5">{formik.errors.password}</small>
                             )}
                         </Form.Group>
