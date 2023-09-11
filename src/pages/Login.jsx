@@ -38,6 +38,8 @@ export default function Login() {
     });
 
     function handleLogin(form) {
+        // SET LOADING
+        dispatch({ type: "SET_LOADING", value: true});
         axios
         .post("/users/login", form)
         .then((response) => {
@@ -68,7 +70,10 @@ export default function Login() {
                 position: toast.POSITION.TOP_RIGHT,
                 type: toast.TYPE.ERROR,
             });
-        });
+        }).finally(() => {
+            // SET LOADING
+            dispatch({ type: "SET_LOADING", value: false });
+        })
     }
 
     return (

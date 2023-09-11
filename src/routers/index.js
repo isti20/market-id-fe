@@ -4,21 +4,28 @@ import {
     Route,
 } from "react-router-dom";
 
-// Import component, layout, page and auth
+// IMPORT COMPONENT, LAYOUT, PAGE AND AUTH
 import App from "../App";
 
-// Customer
-import Home from "../pages/Home";
+// LAYOUT PRODUCT
+import LayoutProduct from "../pages/LayoutProduct";
+
+// PAGE CUSTOMER
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Products from "../pages/Products";
 
-// Negative page
+// NEGATIVE PAGE
 import Error from "../pages/Error";
 
 export default createBrowserRouter(
     createRoutesFromElements(
         <Route element={<App />}>
-            <Route path="/" element={<Home />} />
+
+            <Route element={<LayoutProduct />}>
+                <Route path="/" element={<Products />}/>
+            </Route>
+
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Error />} />

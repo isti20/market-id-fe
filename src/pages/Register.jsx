@@ -7,6 +7,7 @@ import handleErrorMessage from "../utils/handleErrorMessage";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { axiosInstance as axios} from "../config/https";
+import { useDispatch } from "react-redux";
 
 const initialValues = {
     full_name: "",
@@ -27,6 +28,9 @@ export default function Register() {
     const [show, setShow] = useState(false);
     const navigate = useNavigate();
 
+    // STORES
+    const dispatch = useDispatch();
+
     function handleShowPassword() {
         setShow(!show);
     }
@@ -38,6 +42,9 @@ export default function Register() {
     });
 
     function handleRegister(form) {
+        // SET LOADING
+        dispatch({ type: "SET_LOADING", value: true });
+
         axios
         .post("/users/new", form)
         .then((response) => {
@@ -57,7 +64,10 @@ export default function Register() {
                 position: toast.POSITION.TOP_RIGHT,
                 type: toast.TYPE.ERROR,
             });
-        });
+        }).finally(() => {
+            // SET LOADING
+            dispatch({ type: "SET_LOADING", value: false });
+        })
     }
 
     return (
