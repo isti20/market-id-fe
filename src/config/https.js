@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
     const statusCode = error.response.status;
 
     // REMOVE TOKEN AND USER IN LOCALSTORAGE
-    if (statusCode === 403) {
+    if (statusCode === 403 && statusCode === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
