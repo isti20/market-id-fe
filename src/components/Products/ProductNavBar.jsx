@@ -27,9 +27,10 @@ function ProductNavBar() {
     function handleSubmit(event) {
         event.preventDefault();
 
-        console.log("INI PARAMS", params);
+        console.log("ini", params.q, q);
 
         // SET VALUE PARAMS Q & SORTBY TO STORE PRODUCT
+        dispatch({ type: "ACTION_PAGE", value: 1 });
         dispatch({ type: "ACTION_SEARCH", value: params.q });
         dispatch({ type: "ACTION_SORT_BY", value: params.sort_by });
     }
