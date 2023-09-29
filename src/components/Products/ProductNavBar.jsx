@@ -12,7 +12,13 @@ function ProductNavBar() {
     // STORE AUTH
     const { token, user } = useSelector((state) => state.auth);
     const { q, sort_by } = useSelector((state) => state.product);
+    const { dataCart } = useSelector((state) => state.carts);
+
     const dispatch = useDispatch();
+
+    // Item qty & countQty
+    const itemQty = dataCart.map((item) => item.qty)
+    const countQty = itemQty.reduce((a, b) => a + b, 0)
 
     // STATE
     const [params, setParams] = useState({
@@ -104,7 +110,7 @@ function ProductNavBar() {
                                 to="/cart"
                                 className="btn btn-outline-light my-3 my-md-0 ms-md-3 me-md-3 me-0 d-flex justify-content-center align-items-center"
                               ><i className="bi bi-cart-fill"></i>
-                              <span className="sub__heading__5 ms-2">0</span>
+                              <span className="sub__heading__5 ms-2">{countQty}</span>
                               </Link>
 
                               <Button variant="light" onClick={handleLogout}>Logout</Button>
