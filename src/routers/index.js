@@ -9,6 +9,7 @@ import App from "../App";
 
 // LAYOUT PRODUCT
 import LayoutProduct from "../layouts/LayoutProduct";
+import LayoutCart from "../layouts/LayoutCart";
 
 // LAYOUT AUTH
 import LayoutAuth from "../layouts/LayoutAuth";
@@ -17,6 +18,7 @@ import LayoutAuth from "../layouts/LayoutAuth";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Products from "../pages/Products";
+import Carts from "../pages/Carts";
 
 // NEGATIVE PAGE
 import Error from "../pages/Error";
@@ -28,12 +30,22 @@ export default createBrowserRouter(
     createRoutesFromElements(
         <Route element={<App />}>
 
+            {/* PRODUCT */}
             <Route element={
                 <LayoutAuth auth={auth}>
                     <LayoutProduct />
                 </LayoutAuth>
             }>
                 <Route path="/" element={<Products />}/>
+            </Route>
+
+            {/* CART */}
+            <Route element={
+                <LayoutAuth auth={auth}>
+                    <LayoutCart />
+                </LayoutAuth>
+            }>
+                <Route path="/cart" element={<Carts />}/>
             </Route>
 
             {/* PAGE LOGIN & REGISTER */}
