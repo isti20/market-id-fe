@@ -22,6 +22,7 @@ import Products from "../pages/Products";
 import Carts from "../pages/Carts";
 import Invoices from "../pages/Invoices";
 import Profile from "../pages/Profile";
+import History from "../pages/History";
 
 
 // NEGATIVE PAGE
@@ -60,6 +61,7 @@ export default createBrowserRouter(
                 }
             >
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/history" element={<History />} />
             </Route>
 
             {/* PAGE LOGIN & REGISTER */}
