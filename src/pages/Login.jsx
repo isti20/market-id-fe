@@ -137,7 +137,7 @@ export default function Login() {
                         <Button type="submit" variant="primary" className="w-100 my-4">Login</Button>
 
                         <p className="text__5 text-center mb-0">
-                            Don't have an account? please register <Link to="/Register">register</Link>.
+                            Don't have an account? please register <Link to="/register">register</Link>.
                         </p>
                     </Form>
                 </Card.Body>
