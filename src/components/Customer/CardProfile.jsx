@@ -46,7 +46,9 @@ export default function CardProfile() {
         if (isLoad) {
             // SET LOADING
             dispatch({ type: "SET_LOADING", value: true });
-            axios.get(`/users/${_id}/detail`).then((response) => {
+            axios
+            .get(`${process.env.REACT_APP_API_BASE_URL}/users/${_id}/detail`)
+            .then((response) => {
                 const detail = response.data.data
 
                 // SET URL IMAGE
@@ -78,7 +80,9 @@ export default function CardProfile() {
 
         // SET LOADING
         dispatch({ type: "SET_LOADING", value: true });
-        axios.put(`/users/${_id}/update`, formData).then((response) => {
+        axios
+        .put(`${process.env.REACT_APP_API_BASE_URL}/users/${_id}/update`, formData)
+        .then((response) => {
             toast(response.data.message, {
                 position: toast.POSITION.TOP_RIGHT,
                 type: toast.TYPE.SUCCESS,

@@ -42,7 +42,9 @@ export default function Invoices() {
         if (isUpdate) {
             // SET LOADING
             dispatch({ type: "SET_LOADING", value: true })
-            axios.get(`/checkout/${code}/detail`).then((response) => {
+            axios
+            .get(`${process.env.REACT_APP_API_BASE_URL}/checkout/${code}/detail`)
+            .then((response) => {
                 setData(response.data.data)
                 const carts = response.data.data.cart
                 setCarts(carts)
@@ -72,7 +74,9 @@ export default function Invoices() {
     function handleConfirmDone() {
          // SET LOADING
          dispatch({ type: "SET_LOADING", value: true })
-         axios.put(`/checkout/${code}/confirm`, { status: true }).then((response) => {
+         axios
+         .put(`${process.env.REACT_APP_API_BASE_URL}/checkout/${code}/confirm`, { status: true })
+         .then((response) => {
              console.log('RES', response.data)
              setIsUpdate(true)
          }).catch((error) => {
