@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -46,38 +46,14 @@ const validationSchema = Yup.object({
   village: Yup.object().shape({
     _id: Yup.string().required("Field village is required"),
   }),
-  passcode: Yup.string().required("Field passcode is required")
+  passcode: Yup.string().required("Field passcode is required"),
+  address: Yup.string().required("Field address is required").min(10),
 });
 
-export default function FormAddress() {
-  const dispatch = useDispatch();
+export default function FormAddress(props) {
+  const { isEdit = false, detail = {} } = props
 
-  // GET PROVINCE
-  const [isLoadProvince, setIsLoadProvince] = useState(true);
-  const [dataProvince, setDataProvince] = useState([]);
-  useEffect(() => {
-    if (isLoadProvince) {
-      // SET LOADING
-      dispatch({ type: "SET_LOADING", value: true });
-      axios
-        .get(`${process.env.REACT_APP_API_BASE_URL}/provinces`)
-        .then((response) => {
-          setDataProvince(response.data.data);
-        })
-        .catch((error) => {
-          const message = error.response?.data?.message;
-          toast(handleErrorMessage(message), {
-            position: toast.POSITION.TOP_RIGHT,
-            type: toast.TYPE.ERROR,
-          });
-        })
-        .finally(() => {
-          // SET LOADING
-          dispatch({ type: "SET_LOADING", value: false });
-          setIsLoadProvince(false);
-        });
-    }
-  }, [isLoadProvince, dispatch]);
+  const dispatch = useDispatch();
 
   // FORMIK
   const formik = useFormik({
@@ -88,24 +64,87 @@ export default function FormAddress() {
 
   function handleIsError(key, sub_key) {
     if (sub_key)
-      return (
-        formik.touched[key] &&
-        formik.errors[key] &&
-        formik.touched[key][sub_key] &&
-        formik.errors[key][sub_key]
-      );
+      return (formik.touched[key] && formik.errors[key] && formik.touched[key][sub_key] && formik.errors[key][sub_key]);
 
     return formik.touched[key] && formik.errors[key];
   }
 
-  function handleChangeProvince(event, key) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchData = useCallback(async() => {
+    // SET LOADING
+    dispatch({ type: "SET_LOADING", value: true });
+
+    formik.setFieldValue('name', detail.name)
+    formik.setFieldValue('passcode', detail.passcode)
+    formik.setFieldValue('address', detail.address)
+
+    await getOptionsProvince()
+    formik.setFieldValue('province', {_id: detail.province._id, name: detail.province.name})
+
+    await getOptionsRegency(detail.province._id)
+    formik.setFieldValue('regency', {_id: detail.regency._id, name: detail.regency.name})
+
+    await getOptionsDistrict(detail.regency._id)
+    formik.setFieldValue('district', {_id: detail.district._id, name: detail.district.name})
+
+    await getOptionsVillage(detail.district._id)
+    formik.setFieldValue('village', {_id: detail.village._id, name: detail.village.name})
+
+    // SET LOADING
+    dispatch({ type: "SET_LOADING", value: false });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail, dispatch])
+
+  // PROPS DETAIL
+  useEffect(() => {
+    if (isEdit && JSON.stringify(detail) !== "{}") {
+      console.log("DETAIL", detail)
+      fetchData()
+    }
+  }, [isEdit, detail, fetchData]);
+
+  // GET PROVINCE
+  const [dataProvince, setDataProvince] = useState([]);
+  const [isLoadProvince, setIsLoadProvince] = useState(true);
+  
+  async function getOptionsProvince() {
+    // SET LOADING
+    dispatch({ type: "SET_LOADING", value: true });
+    return axios
+      .get(`${process.env.REACT_APP_API_BASE_URL}/provinces`)
+      .then((response) => {
+        setDataProvince(response.data.data);
+      })
+      .catch((error) => {
+        const message = error.response?.data?.message;
+        toast(handleErrorMessage(message), {
+          position: toast.POSITION.TOP_RIGHT,
+          type: toast.TYPE.ERROR,
+        });
+      })
+      .finally(() => {
+        // SET LOADING
+        dispatch({ type: "SET_LOADING", value: false });
+        setIsLoadProvince(false);
+      });
+  }
+
+  useEffect(() => {
+    if (isLoadProvince && isEdit) {
+      getOptionsProvince()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadProvince, getOptionsProvince, dispatch]);
+
+  async function handleChangeProvince(event, key) {
     formik.setFieldValue(event.target.name, event.target.value);
     const findByID = dataProvince.find(
       (province) => province.id === event.target.value
     );
     formik.setFieldValue(key, findByID ? findByID.name : "");
 
-    if (findByID) getOptionsRegency(findByID.id);
+    if (findByID) await getOptionsRegency(findByID.id);
 
     formik.setFieldValue("regency", { _id: "", name: "" });
     formik.setFieldValue("district", { _id: "", name: "" });
@@ -114,10 +153,10 @@ export default function FormAddress() {
 
   // GET REGENCY
   const [dataRegency, setDataRegency] = useState([]);
-  function getOptionsRegency(id) {
+  async function getOptionsRegency(id) {
     // SET LOADING
     dispatch({ type: "SET_LOADING", value: true });
-    axios
+    return axios
       .get(`${process.env.REACT_APP_API_BASE_URL}/regencies/${id}`)
       .then((response) => {
         setDataRegency(response.data.data);
@@ -135,14 +174,14 @@ export default function FormAddress() {
       });
   }
 
-  function handleChangeRegency(event, key) {
+  async function handleChangeRegency(event, key) {
     formik.setFieldValue(event.target.name, event.target.value);
     const findByID = dataRegency.find(
       (regency) => regency.id === event.target.value
     );
     formik.setFieldValue(key, findByID ? findByID.name : "");
 
-    if (findByID) getOptionsDistrict(findByID.id);
+    if (findByID) await getOptionsDistrict(findByID.id);
 
     formik.setFieldValue("district", { _id: "", name: "" });
     formik.setFieldValue("village", { _id: "", name: "" });
@@ -150,10 +189,10 @@ export default function FormAddress() {
 
   // GET DISTRICT
   const [dataDistrict, setDataDistrict] = useState([]);
-  function getOptionsDistrict(id) {
+  async function getOptionsDistrict(id) {
     // SET LOADING
     dispatch({ type: "SET_LOADING", value: true });
-    axios
+    return axios
       .get(`${process.env.REACT_APP_API_BASE_URL}/district/${id}`)
       .then((response) => {
         setDataDistrict(response.data.data);
@@ -171,24 +210,24 @@ export default function FormAddress() {
       });
   }
 
-  function handleChangeDistrict(event, key) {
+  async function handleChangeDistrict(event, key) {
     formik.setFieldValue(event.target.name, event.target.value);
     const findByID = dataDistrict.find(
       (district) => district.id === event.target.value
     );
     formik.setFieldValue(key, findByID ? findByID.name : "");
 
-    if (findByID) getOptionsVillage(findByID.id);
+    if (findByID) await getOptionsVillage(findByID.id);
 
     formik.setFieldValue("village", { _id: "", name: "" });
   }
 
   // GET VILLAGE
   const [dataVillage, setDataVillage] = useState([]);
-  function getOptionsVillage(id) {
+  async function getOptionsVillage(id) {
     // SET LOADING
     dispatch({ type: "SET_LOADING", value: true });
-    axios
+    return axios
       .get(`${process.env.REACT_APP_API_BASE_URL}/villages/${id}`)
       .then((response) => {
         setDataVillage(response.data.data);
@@ -208,19 +247,30 @@ export default function FormAddress() {
 
   function handleChangeVillage(event, key) {
     formik.setFieldValue(event.target.name, event.target.value);
-    const findByID = dataVillage.find((village) => village.id === event.target.value);
+    const findByID = dataVillage.find(
+      (village) => village.id === event.target.value
+    );
     formik.setFieldValue(key, findByID ? findByID.name : "");
   }
-  
-  const navigate = useNavigate()
+
+  const navigate = useNavigate();
   // SUBMIT
-  function handleOnSubmit(payload) {
+  function handleOnSubmit(values) {
+    if (!isEdit) createAddress(values)
+    else editAddress(values)
+  }
+
+  function createAddress(payload) {
     // SET LOADING
     dispatch({ type: "SET_LOADING", value: true });
     axios
-    .post(`${process.env.REACT_APP_API_BASE_URL}/address/new`, payload)
+      .post(`${process.env.REACT_APP_API_BASE_URL}/address/new`, payload)
       .then((response) => {
-        navigate('/address');
+        toast(response.data.message, {
+          position: toast.POSITION.TOP_RIGHT,
+          type: toast.TYPE.SUCCESS,
+        });
+        navigate("/address");
       })
       .catch((error) => {
         const message = error.response?.data?.message;
@@ -233,6 +283,36 @@ export default function FormAddress() {
         // SET LOADING
         dispatch({ type: "SET_LOADING", value: false });
       });
+  }
+
+  function editAddress(payload) {
+    // SET LOADING
+    dispatch({ type: "SET_LOADING", value: true });
+    axios
+      .put(`${process.env.REACT_APP_API_BASE_URL}/address/${detail._id}/update`, payload)
+      .then((response) => {
+        toast(response.data.message, {
+          position: toast.POSITION.TOP_RIGHT,
+          type: toast.TYPE.SUCCESS,
+        });
+        navigate("/address");
+      })
+      .catch((error) => {
+        const message = error.response?.data?.message;
+        toast(handleErrorMessage(message), {
+          position: toast.POSITION.TOP_RIGHT,
+          type: toast.TYPE.ERROR,
+        });
+      })
+      .finally(() => {
+        // SET LOADING
+        dispatch({ type: "SET_LOADING", value: false });
+      });
+  }
+
+  function handleCancel() {
+    formik.resetForm()
+    navigate('/address')
   }
 
   return (
@@ -327,7 +407,9 @@ export default function FormAddress() {
                 name="village._id"
                 value={formik.values.village._id}
                 onBlur={formik.handleBlur}
-                handleChange={(event, keyChange) => handleChangeVillage(event, keyChange)}
+                handleChange={(event, keyChange) =>
+                  handleChangeVillage(event, keyChange)
+                }
                 keyChange="village.name"
                 isError={handleIsError("village", "_id")}
                 msgError={formik.errors.village && formik.errors.village._id}
@@ -368,7 +450,7 @@ export default function FormAddress() {
                   Address
                 </Form.Label>
                 <Form.Control
-                  as="textarea" 
+                  as="textarea"
                   rows={3}
                   id="address"
                   name="address"
@@ -388,10 +470,11 @@ export default function FormAddress() {
               </Form.Group>
             </Col>
 
-            <Col xs="12">
-              <Button type="submit" variant="success">
-                Create
-              </Button>
+            <Col xs="12" className="d-flex justify-content-end align-items-center mt-3">
+              { isEdit && (
+                <Button type="button" variant="light" onClick={handleCancel} className="me-2">Cancel</Button>
+              )}
+              <Button type="submit" variant="success">{isEdit ? 'Update' : 'Create'}</Button>
             </Col>
           </Row>
         </Form>

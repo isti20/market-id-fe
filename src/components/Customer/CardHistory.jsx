@@ -1,9 +1,12 @@
 import { Card, Image, Button } from "react-bootstrap";
 import formatCurrency from "../../utils/currency";
+import { useNavigate } from "react-router-dom";
 
 export default function CardHistory({ detail }) {
+    const navigate = useNavigate()
+
     function handleDetailInvoice(code_invoice) {
-        console.log('INI', code_invoice)
+        navigate(`/invoice/${code_invoice}`)
     }
     
     return (
