@@ -55,7 +55,7 @@ export default function AListGroup({ menus }) {
                     </ListGroup.Item>
                 ))
             }
-            <ListGroup.Item onClick={() => handleLogout()}>
+            <ListGroup.Item action onClick={() => handleLogout()}>
                 Logout
             </ListGroup.Item>
         </ListGroup>
